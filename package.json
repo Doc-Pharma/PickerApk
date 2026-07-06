@@ -3,17 +3,40 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
+    "start": "npx react-native start",
+    "android:dev": "npx react-native run-android --mode=devDebug",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@mgcrea/vision-camera-barcode-scanner": "^0.12.3",
+    "@notifee/react-native": "^9.1.8",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "@react-native-firebase/analytics": "^25.0.0",
+    "@react-native-firebase/app": "^25.0.0",
+    "@react-native-firebase/crashlytics": "^25.0.0",
+    "@react-native-firebase/messaging": "^25.0.0",
+    "@react-native/new-app-screen": "0.81.5",
+    "@react-navigation/native": "^7.2.2",
+    "@react-navigation/native-stack": "^7.14.10",
+    "axios": "^1.14.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
-    "@react-native/new-app-screen": "0.81.5",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-config": "^1.6.1",
+    "react-native-device-info": "^15.0.2",
+    "react-native-otp-verify": "^1.2.0",
+    "react-native-qrcode-svg": "^6.3.21",
+    "react-native-reanimated": "^4.3.0",
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-screens": "^4.24.0",
+    "react-native-svg": "^15.15.4",
+    "react-native-toast-message": "^2.3.3",
+    "react-native-vision-camera": "^4.7.3",
+    "react-native-worklets": "^0.8.1",
+    "react-native-worklets-core": "^1.6.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -30,12 +53,19 @@
     "@types/react": "^19.1.0",
     "@types/react-test-renderer": "^19.1.0",
     "eslint": "^8.19.0",
+    "husky": "^9.1.7",
     "jest": "^29.6.3",
+    "lint-staged": "^16.4.0",
     "prettier": "2.8.8",
     "react-test-renderer": "19.1.0",
     "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=20"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "prettier --write"
+    ]
   }
 }

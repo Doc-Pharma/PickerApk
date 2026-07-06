@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "300866605598",
+    "project_id": "picker-putter-app",
+    "storage_bucket": "picker-putter-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300866605598:android:ac6835b065b18af682d40f",
+        "android_client_info": {
+          "package_name": "com.fledgehealth.picker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqElJOgMUKQDTl-7iX-FFMTL86vTWbqnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,12 @@
-package com.pickerapp
+package com.fledgehealth.picker
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.ContentResolver
+import android.media.AudioAttributes
+import android.net.Uri
+import android.os.Build
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -34,5 +40,31 @@ class MainApplication : Application(), ReactApplication {
   override fun onCreate() {
     super.onCreate()
     loadReactNative(this)
+    createNotificationChannels()
+  }
+
+  private fun createNotificationChannels() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      val soundUri = Uri.parse(
+        "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${packageName}/raw/order"
+      )
+      val audioAttributes = AudioAttributes.Builder()
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+        .build()
+
+      val channel = NotificationChannel(
+        "picker_tasks",
+        "Picker Task Notifications",
+        NotificationManager.IMPORTANCE_HIGH
+      ).apply {
+        description = "New pickup task assignments"
+        setSound(soundUri, audioAttributes)
+        enableVibration(true)
+      }
+
+      val manager = getSystemService(NotificationManager::class.java)
+      manager.createNotificationChannel(channel)
+    }
   }
 }
