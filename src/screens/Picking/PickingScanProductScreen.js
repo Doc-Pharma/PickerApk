@@ -45,10 +45,13 @@ const parseChips = loc => {
 };
 
 const PickingScanProductScreen = ({ navigation, route }) => {
-  const { orderId, item } = route?.params || {};
+  const { orderId, item, allItems } = route?.params || {};
 
-  // scanIndex comes back from ConfirmItem when looping (e.g. 2, 3, ...)
-  const scanIndex = route?.params?.scanIndex ?? 1;
+  // scanIndex comes back from ConfirmItem when looping (e.g. 2, 3, ...).
+  // On a fresh entry (no scanIndex in params), resume from item.picked_quantity
+  // so units already confirmed before an app restart aren't re-scanned.
+  const scanIndex =
+    route?.params?.scanIndex ?? (item?.picked_quantity || 0) + 1;
   const qtyRequired = item?.qty || 1;
 
   const productName = item?.name;
@@ -122,6 +125,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       scanIndex,
       qtyRequired,
       manualEntry,
+      allItems,
     });
   };
 

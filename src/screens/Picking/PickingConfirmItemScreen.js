@@ -17,6 +17,7 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
     scanIndex = 1,
     qtyRequired = 1,
     manualEntry,
+    allItems,
   } = route?.params || {};
 
   const productName = item?.name;
@@ -54,8 +55,19 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
       });
 
       if (isLastUnit) {
+        const hasPending = (allItems || []).some(
+          i => i.id !== item?.id && !i.done,
+        );
+
         Toast.success(`${productName} fully picked!`);
-        navigation.navigate(Routes.PICKING_REVIEW, { orderId });
+
+        if (hasPending) {
+          navigation.navigate(Routes.PICKING_ORDER_DETAIL, {
+            taskId: orderId,
+          });
+        } else {
+          navigation.navigate(Routes.PICKING_REVIEW, { orderId });
+        }
       } else {
         Toast.success(`Unit ${scanIndex} of ${qtyRequired} confirmed`);
         // Navigate back to scan screen — React Navigation pops confirm and updates ScanProduct params
@@ -63,6 +75,7 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
           orderId,
           item,
           scanIndex: scanIndex + 1,
+          allItems,
         });
       }
     } catch (err) {
@@ -126,7 +139,6 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
               value: expiry || '—',
               valueStyle: { color: Colors.green },
             },
-            { label: 'MRP', value: mrp ? `₹${mrp}` : '—' },
           ]}
         />
 
