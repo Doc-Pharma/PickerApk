@@ -21,7 +21,7 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
   } = route?.params || {};
 
   const productName = item?.name;
-  const dpId = item?.dp_id || batch?.dpId || batch?.dp_id || '';
+  const dpId = batch?.dpId || batch?.dp_id || item?.dp_id || '';
   const batchNo = batch?.batch_no || batch?.batch_number || batch?.id || '';
   const expiry = batch?.expiry || batch?.expiry_date || '';
   const expiryRaw = batch?.exp_date || batch?.expiry_date || expiry || '';
