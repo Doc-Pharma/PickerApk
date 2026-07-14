@@ -60,6 +60,26 @@ const PutAwayScanProductScreen = ({ navigation, route }) => {
 
     const { dpId, batchNumber, expiryDate } = paApi.parsePutAwayQR(code);
 
+    if (item?.dp_id && dpId !== item.dp_id) {
+      setScanStatus('error');
+      setErrorMsg(
+        `Wrong product scanned. Please scan the QR label on "${item?.name}".`,
+      );
+      Toast.error('Wrong product scanned');
+      setScanActive(true);
+      return;
+    }
+
+    if (item?.batch_number && batchNumber !== item.batch_number) {
+      setScanStatus('error');
+      setErrorMsg(
+        `Wrong batch scanned. Please scan the QR label on "${item?.name}".`,
+      );
+      Toast.error('Wrong batch scanned');
+      setScanActive(true);
+      return;
+    }
+
     try {
       const res = await doScan(item?.id, dpId);
       if (res?.success !== false) {
