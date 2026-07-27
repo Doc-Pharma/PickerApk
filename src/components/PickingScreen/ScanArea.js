@@ -16,6 +16,8 @@ import { FlashIcon } from '../../assets/Icons';
 import Colors from '../../theme/colors';
 
 const FRAME = 200;
+const WRAPPER_HEIGHT = 260;
+const ZOOM_FACTOR = 1.5;
 
 const ScanArea = ({
   status = 'idle',
@@ -66,6 +68,13 @@ const ScanArea = ({
 
   const device = useCameraDevice('back');
   const [torch, setTorch] = useState(false);
+
+  const zoom = device
+    ? Math.min(
+        device.maxZoom,
+        Math.max(device.minZoom, device.neutralZoom * ZOOM_FACTOR),
+      )
+    : 1;
 
   const lastScanned = useRef(null);
 
@@ -121,10 +130,19 @@ const ScanArea = ({
             device={device}
             isActive={active && status !== 'ok'}
             torch={torch ? 'on' : 'off'}
+            zoom={zoom}
             {...cameraProps}
           />
         )}
-        <View style={s.dimOverlay} />
+        <View style={s.focusOverlay} pointerEvents="none">
+          <View style={s.dimEdge} />
+          <View style={s.dimRow}>
+            <View style={s.dimEdge} />
+            <View style={s.clearWindow} />
+            <View style={s.dimEdge} />
+          </View>
+          <View style={s.dimEdge} />
+        </View>
         {scanFrame}
         {device && (
           <TouchableOpacity
@@ -148,14 +166,26 @@ const s = StyleSheet.create({
     marginHorizontal: 14,
     marginTop: 12,
     borderRadius: 18,
-    height: 260,
+    height: WRAPPER_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  dimOverlay: {
+  focusOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.42)',
+    flexDirection: 'column',
+  },
+  dimEdge: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.72)',
+  },
+  dimRow: {
+    height: FRAME,
+    flexDirection: 'row',
+  },
+  clearWindow: {
+    width: FRAME,
+    height: FRAME,
   },
   frame: {
     width: FRAME,
