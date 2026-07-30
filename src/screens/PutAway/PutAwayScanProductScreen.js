@@ -58,7 +58,8 @@ const PutAwayScanProductScreen = ({ navigation, route }) => {
     if (scanStatus === 'ok' || loading) return;
     setScanActive(false);
 
-    const { dpId, batchNumber, expiryDate } = paApi.parsePutAwayQR(code);
+    const { dpId, batchNumber, expiryDate, partnerId } =
+      paApi.parsePutAwayQR(code);
 
     if (item?.dp_id && dpId !== item.dp_id) {
       setScanStatus('error');
@@ -81,7 +82,7 @@ const PutAwayScanProductScreen = ({ navigation, route }) => {
     }
 
     try {
-      const res = await doScan(item?.id, dpId);
+      const res = await doScan(item?.id, dpId, partnerId);
       if (res?.success !== false) {
         setScanStatus('ok');
         const raw = res?.data || res || {};

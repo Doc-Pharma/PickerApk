@@ -45,7 +45,7 @@ const parseChips = loc => {
 };
 
 const PickingScanProductScreen = ({ navigation, route }) => {
-  const { orderId, item, allItems } = route?.params || {};
+  const { orderId, item, allItems, partnerId } = route?.params || {};
 
   // scanIndex comes back from ConfirmItem when looping (e.g. 2, 3, ...).
   // On a fresh entry (no scanIndex in params), resume from item.picked_quantity
@@ -71,7 +71,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
     if (!productId) return;
     setBatchesLoading(true);
     pickingApi
-      .getProductBatches(productId)
+      .getProductBatches(productId, partnerId)
       .then(res => {
         const raw = Array.isArray(res?.data) ? res.data : [];
         setBatches(
@@ -85,7 +85,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       })
       .catch(() => {})
       .finally(() => setBatchesLoading(false));
-  }, [item?.product_id]);
+  }, [item?.product_id, partnerId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -100,7 +100,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
   const parseQR = code => {
     const parts = (code || '').split(',');
     if (parts.length < 5) return null;
-    const partnerId = (parts[0] || '').trim();
+    const scannedPartnerId = (parts[0] || '').trim();
     const dpId = (parts[4] || '').trim();
     const batchNo = (parts[2] || '').trim();
     const expRaw = (parts[3] || '').trim();
@@ -112,7 +112,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       id: batchNo,
       label: batchNo,
       expiry: formatExpiry(expRaw),
-      partner_id: partnerId,
+      partner_id: scannedPartnerId,
       unique_id: uniqueId,
     };
   };
@@ -126,6 +126,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       qtyRequired,
       manualEntry,
       allItems,
+      partnerId,
     });
   };
 

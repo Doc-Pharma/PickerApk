@@ -18,6 +18,7 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
     qtyRequired = 1,
     manualEntry,
     allItems,
+    partnerId: expectedPartnerId,
   } = route?.params || {};
 
   const productName = item?.name;
@@ -76,6 +77,7 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
           item,
           scanIndex: scanIndex + 1,
           allItems,
+          partnerId: expectedPartnerId,
         });
       }
     } catch (err) {
