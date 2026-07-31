@@ -8,6 +8,7 @@ import Colors from '../../theme/colors';
 import Routes from '../../navigation/routes';
 import * as pickingApi from '../../api/picking';
 import Toast from '../../utils/toast';
+import ApiErrorCode from '../../constants/errorCodes';
 
 const PickingConfirmItemScreen = ({ navigation, route }) => {
   const {
@@ -81,6 +82,11 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
         });
       }
     } catch (err) {
+      if (err?.code === ApiErrorCode.ORDER_CANCELLED) {
+        Toast.error(err?.message || 'This order has been cancelled');
+        navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        return;
+      }
       Toast.error(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);

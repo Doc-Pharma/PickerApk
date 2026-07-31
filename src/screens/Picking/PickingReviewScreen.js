@@ -9,6 +9,7 @@ import Routes from '../../navigation/routes';
 import * as pickingApi from '../../api/picking';
 import useApi from '../../hooks/useApi';
 import Toast from '../../utils/toast';
+import ApiErrorCode from '../../constants/errorCodes';
 
 const PickingReviewScreen = ({ navigation, route }) => {
   const { orderId } = route?.params || {};
@@ -47,8 +48,13 @@ const PickingReviewScreen = ({ navigation, route }) => {
       };
       Toast.success('Task completed!');
       navigation.navigate(Routes.PICKING_INVOICE, { orderId, invoice });
-    } catch {
-      // toast shown by useApi
+    } catch (err) {
+      // toast already shown by useApi - if the order was cancelled in the background
+      // while this screen was open, bounce back to Home instead of leaving the picker
+      // stuck on a dead task
+      if (err?.code === ApiErrorCode.ORDER_CANCELLED) {
+        navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+      }
     }
   };
 

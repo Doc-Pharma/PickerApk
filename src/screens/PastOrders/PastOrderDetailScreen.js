@@ -9,10 +9,10 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
-import { BackIcon, CheckIcon, ChevronRightIcon } from '../../assets/Icons';
+import { CheckIcon, ChevronRightIcon } from '../../assets/Icons';
+import { TopBar, Badge } from '../../components';
 import Colors from '../../theme/colors';
 import Toast from '../../utils/toast';
 import { getOrderDetail } from '../../api/orders';
@@ -112,7 +112,6 @@ const InfoRow = ({ label, value, last = false }) => (
 );
 
 const PastOrderDetailScreen = ({ navigation, route }) => {
-  const insets = useSafeAreaInsets();
   const { order: summaryOrder } = route?.params || {};
 
   const [order, setOrder] = useState(null);
@@ -153,19 +152,10 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
     return (
       <View style={s.root}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
-        <View style={[s.topBar, { paddingTop: insets.top + 10 }]}>
-          <TouchableOpacity
-            style={s.backBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.75}
-          >
-            <BackIcon color={Colors.g700} width={20} height={20} />
-          </TouchableOpacity>
-          <Text style={s.topBarTitle}>
-            {summaryOrder?.id || 'Order Detail'}
-          </Text>
-          <View style={{ width: 36 }} />
-        </View>
+        <TopBar
+          title={summaryOrder?.id || 'Order Detail'}
+          onBack={() => navigation.goBack()}
+        />
         <PastOrderDetailSkeleton />
       </View>
     );
@@ -175,27 +165,24 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
     <View style={s.root}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      {/* Top bar */}
-      <View style={[s.topBar, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity
-          style={s.backBtn}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.75}
-        >
-          <BackIcon color={Colors.g700} width={20} height={20} />
-        </TouchableOpacity>
-        <View style={s.topBarTitleWrap}>
-          <Text style={s.topBarTitle} numberOfLines={1}>
-            {order?.id || summaryOrder?.id || 'Order Detail'}
-          </Text>
-          {!!order?.order_type && (
-            <Text style={s.topBarSubtitle} numberOfLines={1}>
-              {order.order_type}
-            </Text>
-          )}
-        </View>
-        <View style={{ width: 36 }} />
-      </View>
+      {/* Header */}
+      <TopBar
+        title={order?.id || summaryOrder?.id || 'Order Detail'}
+        onBack={() => navigation.goBack()}
+        right={
+          <View style={s.badgeRow}>
+            {order?.order_type ? (
+              <View style={s.hlBadge}>
+                <Text style={s.hlText}>{order.order_type}</Text>
+              </View>
+            ) : null}
+            <Badge
+              label={taskTypeLabel}
+              variant={isPicking ? 'picking' : 'putaway'}
+            />
+          </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Completion summary */}
@@ -210,6 +197,25 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
             </Text>
           </View>
         </View>
+
+        {/* Invoice QR */}
+        {isPicking && (
+          <View style={s.qrCard}>
+            <Text style={s.sectionTitle}>Invoice QR</Text>
+            <View style={[s.qrInfoRow, { borderBottomWidth: 0 }]}>
+              <Text style={s.infoLabel}>Order Number</Text>
+              <Text style={s.infoValue}>{order?.id || '---'}</Text>
+            </View>
+            <View style={s.qrBox}>
+              <QRCode
+                value={`${ENV.ONE_APP_URL}/home?fh_order_id=${order?.invoice_id}`}
+                size={190}
+                color={Colors.g900}
+                backgroundColor="transparent"
+              />
+            </View>
+          </View>
+        )}
 
         {/* Task details */}
         <View style={s.card}>
@@ -265,29 +271,6 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Order identification */}
-        {isPicking && (
-          <View style={s.qrCard}>
-            <Text style={s.sectionTitle}>Order Identification</Text>
-            <View style={s.qrInfoRow}>
-              <Text style={s.infoLabel}>Invoice QR</Text>
-              <Text style={s.infoValue}>{order?.invoice_id || '---'}</Text>
-            </View>
-            <View style={[s.qrInfoRow, { borderBottomWidth: 0 }]}>
-              <Text style={s.infoLabel}>Actual Order ID</Text>
-              <Text style={s.infoValue}>{order?.id || '---'}</Text>
-            </View>
-            <View style={s.qrBox}>
-              <QRCode
-                value={`${ENV.ONE_APP_URL}/home?fh_order_id=${order?.invoice_id}`}
-                size={190}
-                color={Colors.g900}
-                backgroundColor="transparent"
-              />
-            </View>
-          </View>
-        )}
-
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -299,37 +282,14 @@ export default PastOrderDetailScreen;
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.g50 },
 
-  topBar: {
-    backgroundColor: Colors.white,
-    paddingHorizontal: 18,
-    paddingBottom: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g100,
+  badgeRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  hlBadge: {
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: Colors.g100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topBarTitleWrap: { flex: 1, alignItems: 'center' },
-  topBarTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.g900,
-    fontFamily: 'monospace',
-  },
-  topBarSubtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: Colors.g500,
-    marginTop: 2,
-  },
+  hlText: { fontSize: 11, fontWeight: '700', color: '#991B1B' },
 
   statusBanner: {
     marginHorizontal: 16,
