@@ -84,7 +84,9 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
     } catch (err) {
       if (err?.code === ApiErrorCode.ORDER_CANCELLED) {
         Toast.error(err?.message || 'This order has been cancelled');
-        navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        setTimeout(() => {
+          navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        }, 500);
         return;
       }
       Toast.error(err?.message || 'Something went wrong');

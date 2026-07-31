@@ -53,7 +53,9 @@ const PickingReviewScreen = ({ navigation, route }) => {
       // while this screen was open, bounce back to Home instead of leaving the picker
       // stuck on a dead task
       if (err?.code === ApiErrorCode.ORDER_CANCELLED) {
-        navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        setTimeout(() => {
+          navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        }, 500);
       }
     }
   };
