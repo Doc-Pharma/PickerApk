@@ -22,6 +22,7 @@ export const getPickingOrder = async orderId => {
     orderType: raw.orderType || raw.order_service_type || raw.order_type || '—',
     assigned: formatDate(raw.assigned),
     totalSkus: raw.totalSkus ?? raw.total_skus ?? 0,
+    partner_id: raw.partner_id ?? null,
   };
   const items = (res?.data?.items || res?.items || []).map(item => ({
     ...item,
@@ -46,8 +47,9 @@ export const markTaskComplete = pickerPutterOrderId =>
     picker_putter_order_id: pickerPutterOrderId,
   });
 
-// GET /picker-putter-order/get-all-batch-for-a-product?product_id=...
-export const getProductBatches = productId =>
+// GET /picker-putter-order/get-all-batch-for-a-product?product_id=...&partner_id=...
+export const getProductBatches = (productId, partnerId) =>
   request('GET', `/picker-putter-order/get-all-batch-for-a-product`, null, {
     product_id: productId,
+    ...(partnerId ? { partner_id: partnerId } : {}),
   });

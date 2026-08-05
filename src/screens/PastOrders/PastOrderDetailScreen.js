@@ -9,10 +9,10 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
-import { BackIcon, CheckIcon } from '../../assets/Icons';
+import { CheckIcon, ChevronRightIcon } from '../../assets/Icons';
+import { TopBar, Badge } from '../../components';
 import Colors from '../../theme/colors';
 import Toast from '../../utils/toast';
 import { getOrderDetail } from '../../api/orders';
@@ -112,11 +112,11 @@ const InfoRow = ({ label, value, last = false }) => (
 );
 
 const PastOrderDetailScreen = ({ navigation, route }) => {
-  const insets = useSafeAreaInsets();
   const { order: summaryOrder } = route?.params || {};
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [skuExpanded, setSkuExpanded] = useState(false);
 
   const fetchDetail = useCallback(async () => {
     try {
@@ -141,24 +141,21 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
   );
 
   const isPicking = (order?.type || summaryOrder?.type) === 'picking';
+  const taskTypeLabel = isPicking ? 'Picking' : 'Put Away';
+  const unitsLabel = isPicking ? 'Total Units Picked' : 'Total Units Placed';
+  const qtyColLabel = isPicking ? 'Picked Quantity' : 'Placed Quantity';
+  const totalSkus = order?.items_list?.length ?? order?.items ?? 0;
+  const totalUnits =
+    order?.items_list?.reduce((sum, it) => sum + (Number(it.qty) || 0), 0) ?? 0;
 
   if (loading || !order) {
     return (
       <View style={s.root}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
-        <View style={[s.topBar, { paddingTop: insets.top + 10 }]}>
-          <TouchableOpacity
-            style={s.backBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.75}
-          >
-            <BackIcon color={Colors.g700} width={20} height={20} />
-          </TouchableOpacity>
-          <Text style={s.topBarTitle}>
-            {summaryOrder?.id || 'Order Detail'}
-          </Text>
-          <View style={{ width: 36 }} />
-        </View>
+        <TopBar
+          title={summaryOrder?.id || 'Order Detail'}
+          onBack={() => navigation.goBack()}
+        />
         <PastOrderDetailSkeleton />
       </View>
     );
@@ -168,90 +165,109 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
     <View style={s.root}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      {/* Top bar */}
-      <View style={[s.topBar, { paddingTop: insets.top + 10 }]}>
-        <TouchableOpacity
-          style={s.backBtn}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.75}
-        >
-          <BackIcon color={Colors.g700} width={20} height={20} />
-        </TouchableOpacity>
-        <Text style={s.topBarTitle}>{summaryOrder?.id || 'Order Detail'}</Text>
-        <View style={{ width: 36 }} />
-      </View>
+      {/* Header */}
+      <TopBar
+        title={order?.id || summaryOrder?.id || 'Order Detail'}
+        onBack={() => navigation.goBack()}
+        right={
+          <View style={s.badgeRow}>
+            {order?.order_type ? (
+              <View style={s.hlBadge}>
+                <Text style={s.hlText}>{order.order_type}</Text>
+              </View>
+            ) : null}
+            <Badge
+              label={taskTypeLabel}
+              variant={isPicking ? 'picking' : 'putaway'}
+            />
+          </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Status banner */}
+        {/* Completion summary */}
         <View style={s.statusBanner}>
           <View style={s.doneCircle}>
             <CheckIcon color={Colors.green} size={18} />
           </View>
           <View>
-            <Text style={s.statusTitle}>Completed</Text>
+            <Text style={s.statusTitle}>{taskTypeLabel} Completed</Text>
             <Text style={s.statusSub}>
               {order?.completed_at ? formatDate(order.completed_at) : '---'}
             </Text>
           </View>
         </View>
 
-        {/* Order info card */}
-        <View style={s.card}>
-          <InfoRow label="Order ID" value={order?.id} />
-          <InfoRow label="Type" value={isPicking ? 'Picking' : 'Put Away'} />
-          <InfoRow label="Order Type" value={order?.order_type} />
-          <InfoRow label="Invoice Number" value={order?.invoice_id} />
-          <InfoRow
-            label="Total Items"
-            value={order?.items != null ? `${order.items} items` : null}
-            last
-          />
-        </View>
-
-        {/* Items list */}
-        {order?.items_list?.length > 0 && (
-          <View style={s.card}>
-            <Text style={s.sectionTitle}>Items</Text>
-            {order.items_list.map((item, i) => (
-              <View
-                key={i}
-                style={[
-                  s.itemRow,
-                  i === order.items_list.length - 1 && { borderBottomWidth: 0 },
-                ]}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={s.itemName} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  {!isPicking && (item.batch || item.expiry) && (
-                    <Text style={s.itemMeta}>
-                      {item.batch} · exp {item.expiry}
-                    </Text>
-                  )}
-                </View>
-                <View style={s.qtyBadge}>
-                  <Text style={s.qtyText}>×{item.qty}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* QR code for picking orders */}
+        {/* Invoice QR */}
         {isPicking && (
           <View style={s.qrCard}>
-            <Text style={s.qrTitle}>Invoice QR</Text>
-            <Text style={s.qrSub}>Scan to confirm handover</Text>
+            <Text style={s.sectionTitle}>Invoice QR</Text>
+            <View style={[s.qrInfoRow, { borderBottomWidth: 0 }]}>
+              <Text style={s.infoLabel}>Order Number</Text>
+              <Text style={s.infoValue}>{order?.id || '---'}</Text>
+            </View>
             <View style={s.qrBox}>
               <QRCode
                 value={`${ENV.ONE_APP_URL}/home?fh_order_id=${order?.invoice_id}`}
-                size={150}
+                size={190}
                 color={Colors.g900}
                 backgroundColor="transparent"
               />
             </View>
-            <Text style={s.qrId}>Order #{order.id}</Text>
+          </View>
+        )}
+
+        {/* Task details */}
+        <View style={s.card}>
+          <Text style={s.sectionTitle}>Task Details</Text>
+          <InfoRow label="Order ID" value={order?.id} />
+          <InfoRow label="Order Type" value={order?.order_type} />
+          <InfoRow label="Task Type" value={taskTypeLabel} />
+          <InfoRow label="Total SKUs" value={totalSkus} />
+          <InfoRow label={unitsLabel} value={totalUnits} last />
+        </View>
+
+        {/* SKU details — collapsible */}
+        {order?.items_list?.length > 0 && (
+          <View style={s.card}>
+            <TouchableOpacity
+              style={s.skuHeader}
+              activeOpacity={0.7}
+              onPress={() => setSkuExpanded(e => !e)}
+            >
+              <Text style={s.sectionTitleInline}>
+                SKU Details ({order.items_list.length})
+              </Text>
+              <View
+                style={{
+                  transform: [{ rotate: skuExpanded ? '90deg' : '0deg' }],
+                }}
+              >
+                <ChevronRightIcon color={Colors.g500} width={18} height={18} />
+              </View>
+            </TouchableOpacity>
+            {skuExpanded &&
+              order.items_list.map((item, i) => (
+                <View
+                  key={i}
+                  style={[
+                    s.itemRow,
+                    i === order.items_list.length - 1 && {
+                      borderBottomWidth: 0,
+                    },
+                  ]}
+                >
+                  <Text style={s.itemName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <View style={s.qtyBadge}>
+                    <Text style={s.qtyText}>×{item.qty}</Text>
+                  </View>
+                </View>
+              ))}
+            {!skuExpanded && (
+              <Text style={s.skuHint}>{qtyColLabel} per SKU · tap to view</Text>
+            )}
           </View>
         )}
 
@@ -266,30 +282,14 @@ export default PastOrderDetailScreen;
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.g50 },
 
-  topBar: {
-    backgroundColor: Colors.white,
-    paddingHorizontal: 18,
-    paddingBottom: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g100,
+  badgeRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
+  hlBadge: {
+    backgroundColor: '#FEE2E2',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 5,
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: Colors.g100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topBarTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.g900,
-    fontFamily: 'monospace',
-  },
+  hlText: { fontSize: 11, fontWeight: '700', color: '#991B1B' },
 
   statusBanner: {
     marginHorizontal: 16,
@@ -354,21 +354,34 @@ const s = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 6,
   },
+  sectionTitleInline: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.g500,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+  },
+  skuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+  },
+  skuHint: {
+    fontSize: 12,
+    color: Colors.g500,
+    paddingBottom: 14,
+  },
   itemRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.g50,
     gap: 10,
   },
-  itemName: { fontSize: 13, fontWeight: '600', color: Colors.g900 },
-  itemMeta: {
-    fontSize: 11,
-    color: Colors.g500,
-    marginTop: 2,
-    fontFamily: 'monospace',
-  },
+  itemName: { flex: 1, fontSize: 13, fontWeight: '600', color: Colors.g900 },
   qtyBadge: {
     backgroundColor: Colors.g100,
     paddingHorizontal: 10,
@@ -385,22 +398,25 @@ const s = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.g100,
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    overflow: 'hidden',
   },
-  qrTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.g900,
-    marginBottom: 4,
+  qrInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.g50,
   },
-  qrSub: { fontSize: 12, color: Colors.g500, marginBottom: 18 },
   qrBox: {
     padding: 14,
     backgroundColor: Colors.g50,
     borderRadius: 12,
-    marginBottom: 12,
+    marginTop: 14,
   },
-  qrId: { fontSize: 12, color: Colors.g500, fontFamily: 'monospace' },
 });
 
 const sk = StyleSheet.create({

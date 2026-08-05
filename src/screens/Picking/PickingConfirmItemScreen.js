@@ -8,6 +8,7 @@ import Colors from '../../theme/colors';
 import Routes from '../../navigation/routes';
 import * as pickingApi from '../../api/picking';
 import Toast from '../../utils/toast';
+import ApiErrorCode from '../../constants/errorCodes';
 
 const PickingConfirmItemScreen = ({ navigation, route }) => {
   const {
@@ -17,10 +18,12 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
     scanIndex = 1,
     qtyRequired = 1,
     manualEntry,
+    allItems,
+    partnerId: expectedPartnerId,
   } = route?.params || {};
 
   const productName = item?.name;
-  const dpId = item?.dp_id || batch?.dpId || batch?.dp_id || '';
+  const dpId = batch?.dpId || batch?.dp_id || item?.dp_id || '';
   const batchNo = batch?.batch_no || batch?.batch_number || batch?.id || '';
   const expiry = batch?.expiry || batch?.expiry_date || '';
   const expiryRaw = batch?.exp_date || batch?.expiry_date || expiry || '';
@@ -54,8 +57,19 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
       });
 
       if (isLastUnit) {
+        const hasPending = (allItems || []).some(
+          i => i.id !== item?.id && !i.done,
+        );
+
         Toast.success(`${productName} fully picked!`);
-        navigation.navigate(Routes.PICKING_REVIEW, { orderId });
+
+        if (hasPending) {
+          navigation.navigate(Routes.PICKING_ORDER_DETAIL, {
+            taskId: orderId,
+          });
+        } else {
+          navigation.navigate(Routes.PICKING_REVIEW, { orderId });
+        }
       } else {
         Toast.success(`Unit ${scanIndex} of ${qtyRequired} confirmed`);
         // Navigate back to scan screen — React Navigation pops confirm and updates ScanProduct params
@@ -63,9 +77,18 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
           orderId,
           item,
           scanIndex: scanIndex + 1,
+          allItems,
+          partnerId: expectedPartnerId,
         });
       }
     } catch (err) {
+      if (err?.code === ApiErrorCode.ORDER_CANCELLED) {
+        Toast.error(err?.message || 'This order has been cancelled');
+        setTimeout(() => {
+          navigation.reset({ index: 0, routes: [{ name: Routes.HOME }] });
+        }, 500);
+        return;
+      }
       Toast.error(err?.message || 'Something went wrong');
     } finally {
       setLoading(false);
@@ -126,7 +149,6 @@ const PickingConfirmItemScreen = ({ navigation, route }) => {
               value: expiry || '—',
               valueStyle: { color: Colors.green },
             },
-            { label: 'MRP', value: mrp ? `₹${mrp}` : '—' },
           ]}
         />
 

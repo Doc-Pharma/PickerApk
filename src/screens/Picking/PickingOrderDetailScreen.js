@@ -140,6 +140,7 @@ const PickingOrderDetailScreen = ({ navigation, route }) => {
                   orderId,
                   item,
                   allItems: items,
+                  partnerId: order.partner_id,
                 })
               }
             />
@@ -157,6 +158,7 @@ const PickingOrderDetailScreen = ({ navigation, route }) => {
               orderId,
               item: nextPending,
               allItems: items,
+              partnerId: order.partner_id,
             })
           }
         />

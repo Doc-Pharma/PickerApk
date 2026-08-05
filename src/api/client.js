@@ -66,7 +66,12 @@ api.interceptors.response.use(
       error?.message ||
       'Something went wrong';
 
-    return Promise.reject(new Error(message));
+    const wrappedError = new Error(message);
+    if (error?.response?.data?.code) {
+      wrappedError.code = error.response.data.code;
+    }
+
+    return Promise.reject(wrappedError);
   },
 );
 

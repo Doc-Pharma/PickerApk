@@ -45,10 +45,13 @@ const parseChips = loc => {
 };
 
 const PickingScanProductScreen = ({ navigation, route }) => {
-  const { orderId, item } = route?.params || {};
+  const { orderId, item, allItems, partnerId } = route?.params || {};
 
-  // scanIndex comes back from ConfirmItem when looping (e.g. 2, 3, ...)
-  const scanIndex = route?.params?.scanIndex ?? 1;
+  // scanIndex comes back from ConfirmItem when looping (e.g. 2, 3, ...).
+  // On a fresh entry (no scanIndex in params), resume from item.picked_quantity
+  // so units already confirmed before an app restart aren't re-scanned.
+  const scanIndex =
+    route?.params?.scanIndex ?? (item?.picked_quantity || 0) + 1;
   const qtyRequired = item?.qty || 1;
 
   const productName = item?.name;
@@ -68,7 +71,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
     if (!productId) return;
     setBatchesLoading(true);
     pickingApi
-      .getProductBatches(productId)
+      .getProductBatches(productId, partnerId)
       .then(res => {
         const raw = Array.isArray(res?.data) ? res.data : [];
         setBatches(
@@ -82,7 +85,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       })
       .catch(() => {})
       .finally(() => setBatchesLoading(false));
-  }, [item?.product_id]);
+  }, [item?.product_id, partnerId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -97,7 +100,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
   const parseQR = code => {
     const parts = (code || '').split(',');
     if (parts.length < 5) return null;
-    const partnerId = (parts[0] || '').trim();
+    const scannedPartnerId = (parts[0] || '').trim();
     const dpId = (parts[4] || '').trim();
     const batchNo = (parts[2] || '').trim();
     const expRaw = (parts[3] || '').trim();
@@ -109,7 +112,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       id: batchNo,
       label: batchNo,
       expiry: formatExpiry(expRaw),
-      partner_id: partnerId,
+      partner_id: scannedPartnerId,
       unique_id: uniqueId,
     };
   };
@@ -122,6 +125,8 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       scanIndex,
       qtyRequired,
       manualEntry,
+      allItems,
+      partnerId,
     });
   };
 

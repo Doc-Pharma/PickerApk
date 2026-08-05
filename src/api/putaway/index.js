@@ -26,13 +26,14 @@ export const getPutAwayTask = async taskId => {
   return { ...res, data: { task, items } };
 };
 
-// QR format: "random,product_id,batch_number,expiry_date,dp_id,id"
-// parts[0]=random  parts[1]=product_id  parts[2]=batch  parts[3]=expiry  parts[4]=dp_id  parts[5]=id
+// QR format: "partner_id,product_id,batch_number,expiry_date,dp_id,id"
+// parts[0]=partner_id  parts[1]=product_id  parts[2]=batch  parts[3]=expiry  parts[4]=dp_id  parts[5]=id
 export const parsePutAwayQR = code => {
   const parts = (code || '').trim().split(',');
   const dpId = (parts[4] || '').trim();
   return {
     dpId,
+    partnerId: (parts[0] || '').trim(),
     productId: parts[1] || '',
     batchNumber: parts[2] || '',
     expiryDate: parts[3] || '',
@@ -40,9 +41,9 @@ export const parsePutAwayQR = code => {
   };
 };
 
-export const scanPutAwayProduct = (itemId, dpId) =>
+export const scanPutAwayProduct = (itemId, dpId, partnerId) =>
   request('POST', `/picker-putter-order/task/${itemId}/putaway/scan`, {
-    qr_code_data: { dp_id: dpId },
+    qr_code_data: { dp_id: dpId, partner_id: partnerId },
   });
 
 export const scanPutAwayLocation = (itemId, scannedLocationId) =>
