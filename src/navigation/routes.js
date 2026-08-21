@@ -26,6 +26,11 @@ const Routes = {
   PUT_AWAY_PLACED: 'PutAwayPlaced',
   PUT_AWAY_COMPLETE: 'PutAwayComplete',
 
+  // Product qr scanning flow
+  PRODUCT_QR_SCAN: 'ProductQrScan',
+  PRODUCT_DETAILS: 'ProductDetails',
+  PRODUCT_VERIFY_LOCATION: 'ProductVerifyLocation',
+
   // Picking flow
   PICKING_ORDER_DETAIL: 'PickingOrderDetail',
   PICKING_SCAN_PRODUCT: 'PickingScanProduct',
