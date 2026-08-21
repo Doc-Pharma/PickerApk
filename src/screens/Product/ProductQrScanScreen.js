@@ -44,9 +44,7 @@ const ProductQrScanScreen = ({ navigation }) => {
 
           return;
         }
-      } catch {
-        // Continue with product QR parsing
-      }
+      } catch {}
 
       const qrData = paApi.parsePutAwayQR(code);
 

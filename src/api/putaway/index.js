@@ -63,6 +63,7 @@ export const scanProductQR = qrData =>
       dp_id: qrData.dpId,
     },
   });
+
 export const verifyProductPutaway = (
   productId,
   partnerId,
