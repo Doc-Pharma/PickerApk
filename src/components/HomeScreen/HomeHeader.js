@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Line } from 'react-native-svg';
+import Svg, { Path, Line, Rect } from 'react-native-svg';
 import { StoreIcon, HandWaveIcon } from '../../assets/Icons';
 import Colors from '../../theme/colors';
 import { useUser } from '../../context/UserContext';
@@ -38,7 +38,30 @@ const HamburgerIcon = () => (
   </Svg>
 );
 
-const HomeHeader = ({ onMenuPress }) => {
+// renders the qr code scan icon used in the ui
+const QrScanIcon = () => (
+  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+    {/* Top-left */}
+    <Path d="M3 3H9V9H3V3Z" stroke={Colors.white} strokeWidth="1.8" />
+    <Path d="M5 5H7V7H5V5Z" fill={Colors.white} />
+
+    {/* Top-right */}
+    <Path d="M15 3H21V9H15V3Z" stroke={Colors.white} strokeWidth="1.8" />
+    <Path d="M17 5H19V7H17V5Z" fill={Colors.white} />
+
+    {/* Bottom-left */}
+    <Path d="M3 15H9V21H3V15Z" stroke={Colors.white} strokeWidth="1.8" />
+    <Path d="M5 17H7V19H5V17Z" fill={Colors.white} />
+
+    {/* Bottom-right */}
+    <Rect x="15" y="15" width="3" height="3" fill={Colors.white} />
+    <Rect x="19" y="15" width="2" height="2" fill={Colors.white} />
+    <Rect x="15" y="19" width="2" height="2" fill={Colors.white} />
+    <Rect x="19" y="19" width="3" height="2" fill={Colors.white} />
+  </Svg>
+);
+
+const HomeHeader = ({ onMenuPress, onScanQRPress }) => {
   const insets = useSafeAreaInsets();
   const { user } = useUser();
   const statusStr = String(user?.status ?? '').toLowerCase();
@@ -63,6 +86,18 @@ const HomeHeader = ({ onMenuPress }) => {
           {isActive ? 'Active' : 'Inactive'}
         </Text>
       </View>
+
+      {/* Scan qr  below Active Status */}
+      <TouchableOpacity
+        style={[styles.scanQrButton, { top: insets.top + 64 }]}
+        onPress={onScanQRPress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.scanQrContainer}>
+          <QrScanIcon />
+        </View>
+        <Text style={styles.scanQrText}>Scan QR</Text>
+      </TouchableOpacity>
 
       <View style={styles.contentRow}>
         {/* Hamburger button */}
@@ -146,7 +181,7 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 8,
   },
-  textCol: { flex: 1 },
+  textCol: { flex: 1, paddingRight: 90 },
   greetRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,5 +234,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.85)',
     fontWeight: '600',
+  },
+
+  scanQrButton: {
+    position: 'absolute',
+    right: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+
+  scanQrText: {
+    marginTop: 3,
+    fontSize: 11,
+    color: Colors.white,
+    fontWeight: '600',
+  },
+
+  scanQrContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
 });

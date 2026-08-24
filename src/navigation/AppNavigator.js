@@ -31,6 +31,11 @@ import ProfileScreen from '../screens/Profile/ProfileScreen';
 import PastOrdersScreen from '../screens/PastOrders/PastOrdersScreen';
 import PastOrderDetailScreen from '../screens/PastOrders/PastOrderDetailScreen';
 
+// product scanning, details, and location verification screens
+import ProductQrScanScreen from '../screens/Product/ProductQrScanScreen';
+import ProductDetailsScreen from '../screens/Product/ProductDetailsScreen';
+import ProductVerifyLocationScreen from '../screens/Product/ProductVerifyLocationScreen';
+
 // Put Away
 import PutAwayDetailScreen from '../screens/PutAway/PutAwayDetailScreen';
 import PutAwayScanProductScreen from '../screens/PutAway/PutAwayScanProductScreen';
@@ -178,6 +183,18 @@ const AuthenticatedNavigator = () => (
       <AuthStack.Screen
         name={Routes.PICKING_COMPLETE}
         component={PickingCompleteScreen}
+      />
+      <AuthStack.Screen
+        name={Routes.PRODUCT_QR_SCAN}
+        component={ProductQrScanScreen}
+      />
+      <AuthStack.Screen
+        name={Routes.PRODUCT_DETAILS}
+        component={ProductDetailsScreen}
+      />
+      <AuthStack.Screen
+        name={Routes.PRODUCT_VERIFY_LOCATION}
+        component={ProductVerifyLocationScreen}
       />
     </AuthStack.Navigator>
   </NavContainer>
