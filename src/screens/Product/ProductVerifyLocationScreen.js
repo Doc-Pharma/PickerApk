@@ -8,22 +8,29 @@ import Colors from '../../theme/colors';
 import * as paApi from '../../api/putaway';
 import useApi from '../../hooks/useApi';
 import Toast from '../../utils/toast';
-
 import Routes from '../../navigation/routes';
+import { parseChips } from '../../utils/helpers';
 
-const parseChips = location => {
-  const parts = (location || '').split('-');
+const scanMsg = err => {
+  const raw = (err?.message || '').toLowerCase();
 
-  if (parts.length < 4) {
-    return [location || '-'];
+  if (raw.includes('404') || raw.includes('not found')) {
+    return 'Location not found. Please scan the bin QR code.';
   }
 
-  return [
-    `Aisle ${parts[0]}`,
-    `Rack ${parts[1].replace('R', '')}`,
-    `Shelf ${parts[2].replace('S', '')}`,
-    `Bin ${parts[3].replace('B', '')}`,
-  ];
+  if (
+    raw.includes('wrong') ||
+    raw.includes('mismatch') ||
+    raw.includes('incorrect')
+  ) {
+    return 'Scanned Location is not correct.';
+  }
+
+  if (raw && !raw.includes('request failed') && !raw.includes('network')) {
+    return err.message;
+  }
+
+  return 'Unable to verify putaway. Please try again.';
 };
 
 const ProductVerifyLocationScreen = ({ navigation, route }) => {
@@ -47,7 +54,6 @@ const ProductVerifyLocationScreen = ({ navigation, route }) => {
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
       StatusBar.setBackgroundColor(Colors.white);
-
       setScanStatus('idle');
       setErrorMsg('');
       setScanActive(true);
@@ -55,23 +61,21 @@ const ProductVerifyLocationScreen = ({ navigation, route }) => {
   );
 
   const handleScanned = async code => {
-    if (scanStatus === 'ok' || loading) {
-      return;
-    }
+    if (scanStatus === 'ok' || loading) return;
 
     setScanActive(false);
     let locationName = '';
 
     try {
       const parsed = JSON.parse(code);
-
       locationName = parsed?.name || '';
     } catch {}
 
     if (!locationName) {
+      setScanStatus('error');
+
       const message = 'Invalid location QR. Please scan the bin QR code.';
 
-      setScanStatus('error');
       setErrorMsg(message);
       Toast.error(message);
       setScanActive(true);
@@ -87,11 +91,9 @@ const ProductVerifyLocationScreen = ({ navigation, route }) => {
         locationName,
       );
 
-      if (response?.success === false) {
+      if (response?.status === false) {
         throw new Error(
-          response?.message ||
-            response?.error ||
-            'Scanned Location is not correct.',
+          response?.message || 'Scanned Location is not correct.',
         );
       }
 
@@ -101,13 +103,13 @@ const ProductVerifyLocationScreen = ({ navigation, route }) => {
       Toast.success('This Putaway has been verified.');
 
       setTimeout(() => {
-        navigation.navigate(Routes.HOME);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: Routes.HOME }],
+        });
       }, 700);
-    } catch (error) {
-      const message =
-        error?.message === 'Request failed with status code 400'
-          ? 'Scanned Location is not correct.'
-          : error?.message || 'Unable to verify putaway. Please try again.';
+    } catch (err) {
+      const message = scanMsg(err);
 
       setScanStatus('error');
       setErrorMsg(message);
@@ -185,18 +187,19 @@ const styles = StyleSheet.create({
   },
 
   successContainer: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 10,
+    marginHorizontal: 14,
+    marginTop: 12,
     backgroundColor: Colors.white,
-    alignItems: 'center',
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: Colors.g100,
   },
 
   successText: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    color: Colors.navy,
+    color: Colors.g900,
     textAlign: 'center',
   },
 

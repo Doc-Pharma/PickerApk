@@ -3,25 +3,10 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { TopBar, Button } from '../../components';
 import Colors from '../../theme/colors';
 import Routes from '../../navigation/routes';
+import { formatExpiryDate } from '../../utils/helpers';
 
 const ProductDetailsScreen = ({ navigation, route }) => {
   const productData = route?.params?.productData;
-
-  const formatExpiryDate = value => {
-    if (!value) return '-';
-    const stringValue = String(value);
-    // Already MM/YY
-    if (/^\d{2}\/\d{2}$/.test(stringValue)) {
-      return stringValue;
-    }
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return stringValue;
-    }
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const year = String(date.getUTCFullYear()).slice(-2);
-    return `${month}/${year}`;
-  };
 
   if (!productData) {
     return (
@@ -38,23 +23,23 @@ const ProductDetailsScreen = ({ navigation, route }) => {
     product,
     inventory,
     partner,
-    partnerSkuId,
-    invoiceNumber,
-    batchNumber,
+    partner_sku_id,
+    invoice_number,
+    batch_number,
     mrp,
     quantity,
-    expiryDate,
+    expiry_date,
     location,
-    putawayStatus,
-    assignedPickerPutter,
+    putaway_status,
+    assigned_picker_putter,
   } = productData;
 
-  const availableQty = inventory?.inventory_count ?? quantity ?? '-';
-  const displayBatch = inventory?.batch_no ?? batchNumber ?? '-';
-  const displayExpiry = formatExpiryDate(inventory?.exp_date ?? expiryDate);
-  const displayMrp = inventory?.mrp ?? mrp ?? '-';
-  const displayLocation = inventory?.locn ?? location ?? null;
-  const isPutawayCompleted = putawayStatus === 'COMPLETED';
+  const available_qty = inventory?.inventory_count ?? quantity ?? '-';
+  const display_batch = inventory?.batch_no ?? batch_number ?? '-';
+  const display_expiry = formatExpiryDate(inventory?.exp_date ?? expiry_date);
+  const display_mrp = inventory?.mrp ?? mrp ?? '-';
+  const display_location = inventory?.locn ?? location ?? null;
+  const is_putaway_completed = putaway_status === 'COMPLETED';
 
   return (
     <View style={styles.safe}>
@@ -72,39 +57,43 @@ const ProductDetailsScreen = ({ navigation, route }) => {
           <DetailRow label="Manufacturer" value={product?.manufacturer} />
           <DetailRow
             label="MRP"
-            value={displayMrp !== '-' ? `₹${displayMrp}` : '-'}
+            value={display_mrp !== '-' ? `₹${display_mrp}` : '-'}
           />
         </View>
 
         {/* Batch Details */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Batch Details</Text>
-          <DetailRow label="Batch Number" value={displayBatch} />
-          <DetailRow label="Available QTY" value={availableQty} />
-          <DetailRow label="Expiry Date" value={displayExpiry} />
+          <DetailRow label="Batch Number" value={display_batch} />
+          <DetailRow label="Available QTY" value={available_qty} />
+          <DetailRow label="Expiry Date" value={display_expiry} />
         </View>
 
         {/* Partner Details */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Partner Details</Text>
           <DetailRow label="Partner Name" value={partner?.name} />
-          <DetailRow label="Partner SKU ID" value={partnerSkuId} />
-          <DetailRow label="Invoice Number" value={invoiceNumber} />
+          <DetailRow label="Partner SKU ID" value={partner_sku_id} />
+          <DetailRow label="Invoice Number" value={invoice_number} />
         </View>
 
         {/* Warehouse Information */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Warehouse Details</Text>
-          <DetailRow label="Location (Bin)" value={displayLocation} highlight />
+          <DetailRow
+            label="Location (Bin)"
+            value={display_location}
+            highlight
+          />
           <DetailRow
             label="Assigned Picker Name"
-            value={assignedPickerPutter}
+            value={assigned_picker_putter}
           />
-          <DetailRow label="Putaway Status" value={putawayStatus} />
+          <DetailRow label="Putaway Status" value={putaway_status} />
         </View>
 
         {/* Verify Putaway */}
-        {isPutawayCompleted && (
+        {is_putaway_completed && (
           <View style={styles.verifySection}>
             <Button
               title="Verify Putaway"
@@ -113,8 +102,8 @@ const ProductDetailsScreen = ({ navigation, route }) => {
                 navigation.navigate(Routes.PRODUCT_VERIFY_LOCATION, {
                   productId: product?.id,
                   partnerId: partner?.id,
-                  batchNumber: displayBatch,
-                  expectedLocation: displayLocation,
+                  batchNumber: display_batch,
+                  expectedLocation: display_location,
                 })
               }
             />

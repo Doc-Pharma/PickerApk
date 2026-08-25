@@ -1,12 +1,36 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+
 import Routes from '../../navigation/routes';
 import { TopBar, ScanArea, ErrorBanner } from '../../components';
 
 import Colors from '../../theme/colors';
 import * as paApi from '../../api/putaway';
 import Toast from '../../utils/toast';
+
+const scanMsg = err => {
+  const raw = (err?.message || '').toLowerCase();
+
+  if (raw.includes('404') || raw.includes('not found')) {
+    return 'Product not found. Please scan the correct product QR label.';
+  }
+
+  if (
+    raw.includes('wrong') ||
+    raw.includes('mismatch') ||
+    raw.includes('incorrect') ||
+    raw.includes('invalid')
+  ) {
+    return 'Invalid Product QR. Please scan the correct product label.';
+  }
+
+  if (raw && !raw.includes('request failed') && !raw.includes('network')) {
+    return err.message;
+  }
+
+  return 'Scan failed. Try again.';
+};
 
 const ProductQrScanScreen = ({ navigation }) => {
   const [scanStatus, setScanStatus] = useState('idle');
@@ -28,8 +52,8 @@ const ProductQrScanScreen = ({ navigation }) => {
 
     setScanActive(false);
 
+    // Validate location QR before product QR parsing
     try {
-      // Validate location QR before product QR parsing
       try {
         const parsed = JSON.parse(code);
 
@@ -41,7 +65,6 @@ const ProductQrScanScreen = ({ navigation }) => {
           setErrorMsg(message);
           Toast.error(message);
           setScanActive(true);
-
           return;
         }
       } catch {}
@@ -60,23 +83,21 @@ const ProductQrScanScreen = ({ navigation }) => {
         setErrorMsg(message);
         Toast.error(message);
         setScanActive(true);
-
         return;
       }
 
       const res = await paApi.scanProductQR(qrData);
 
       setScanStatus('ok');
+      setErrorMsg('');
+
       Toast.success('Product QR scanned successfully');
 
       navigation.navigate(Routes.PRODUCT_DETAILS, {
-        productData: res.product,
+        productData: res.data,
       });
-    } catch (error) {
-      const message =
-        error?.message === 'Request failed with status code 400'
-          ? 'Invalid Product QR. Please scan the correct product label.'
-          : error?.message || 'Product QR API failed';
+    } catch (err) {
+      const message = scanMsg(err);
 
       setScanStatus('error');
       setErrorMsg(message);
@@ -112,16 +133,6 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.g50,
-  },
-  messageContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  message: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.navy,
-    textAlign: 'center',
   },
   bottomSpace: {
     height: 40,
