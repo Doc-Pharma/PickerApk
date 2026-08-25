@@ -210,8 +210,9 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
               <QRCode
                 value={`${ENV.ONE_APP_URL}/home?fh_order_id=${order?.invoice_id}`}
                 size={190}
-                color={Colors.g900}
-                backgroundColor="transparent"
+                color={Colors.qrFg}
+                backgroundColor={Colors.qrBg}
+                quietZone={24}
               />
             </View>
           </View>
@@ -412,8 +413,8 @@ const s = StyleSheet.create({
     borderBottomColor: Colors.g50,
   },
   qrBox: {
-    padding: 14,
-    backgroundColor: Colors.g50,
+    padding: 6,
+    backgroundColor: Colors.qrBg,
     borderRadius: 12,
     marginTop: 14,
   },
