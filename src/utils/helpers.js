@@ -1,3 +1,4 @@
+// formats an expiry date as MM/YY
 export const formatExpiryDate = value => {
   if (!value) return '-';
 
@@ -19,6 +20,7 @@ export const formatExpiryDate = value => {
   return `${month}/${year}`;
 };
 
+// Converts a warehouse location into readable aisle, rack, shelf, and bin labels
 export const parseChips = location => {
   const parts = (location || '').split('-');
 
