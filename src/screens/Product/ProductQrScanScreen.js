@@ -1,5 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import Routes from '../../navigation/routes';
@@ -7,6 +14,7 @@ import { TopBar, ScanArea, ErrorBanner } from '../../components';
 
 import Colors from '../../theme/colors';
 import * as paApi from '../../api/putaway';
+import useApi from '../../hooks/useApi';
 import Toast from '../../utils/toast';
 
 const scanMsg = err => {
@@ -37,6 +45,10 @@ const ProductQrScanScreen = ({ navigation }) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [scanActive, setScanActive] = useState(true);
 
+  const { loading, execute: scanProduct } = useApi(paApi.scanProductQR, {
+    suppressToast: true,
+  });
+
   useFocusEffect(
     useCallback(() => {
       StatusBar.setBarStyle('dark-content');
@@ -48,7 +60,7 @@ const ProductQrScanScreen = ({ navigation }) => {
   );
 
   const handleScanned = async code => {
-    if (scanStatus === 'ok') return;
+    if (scanStatus === 'ok' || loading) return;
 
     setScanActive(false);
 
@@ -86,7 +98,7 @@ const ProductQrScanScreen = ({ navigation }) => {
         return;
       }
 
-      const res = await paApi.scanProductQR(qrData);
+      const res = await scanProduct(qrData);
 
       setScanStatus('ok');
       setErrorMsg('');
@@ -116,8 +128,15 @@ const ProductQrScanScreen = ({ navigation }) => {
           hint="Point camera at the QR label on the product"
           accentColor="blue"
           onScanned={handleScanned}
-          active={scanActive}
+          active={scanActive && !loading}
         />
+
+        {loading && (
+          <View style={styles.loadingRow}>
+            <ActivityIndicator size="small" color={Colors.blue} />
+            <Text style={styles.loadingText}>Verifying product…</Text>
+          </View>
+        )}
 
         <ErrorBanner visible={scanStatus === 'error'} message={errorMsg} />
 
@@ -133,6 +152,18 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.g50,
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 14,
+  },
+  loadingText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.g500,
   },
   bottomSpace: {
     height: 40,

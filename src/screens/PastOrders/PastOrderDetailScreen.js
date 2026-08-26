@@ -12,7 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import { CheckIcon, ChevronRightIcon } from '../../assets/Icons';
-import { TopBar, Badge } from '../../components';
+import { TopBar, Badge, InfoRow } from '../../components';
 import Colors from '../../theme/colors';
 import Toast from '../../utils/toast';
 import { getOrderDetail } from '../../api/orders';
@@ -101,15 +101,6 @@ const formatDate = iso => {
     d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
   );
 };
-
-const InfoRow = ({ label, value, last = false }) => (
-  <View style={[s.infoRow, last && { borderBottomWidth: 0 }]}>
-    <Text style={s.infoLabel}>{label}</Text>
-    <Text style={s.infoValue} numberOfLines={1}>
-      {value || '---'}
-    </Text>
-  </View>
-);
 
 const PastOrderDetailScreen = ({ navigation, route }) => {
   const { order: summaryOrder } = route?.params || {};
@@ -326,14 +317,6 @@ const s = StyleSheet.create({
     borderColor: Colors.g100,
     paddingHorizontal: 16,
     overflow: 'hidden',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 13,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g50,
   },
   infoLabel: { fontSize: 13, color: Colors.g500, fontWeight: '500' },
   infoValue: {

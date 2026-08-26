@@ -1,12 +1,22 @@
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TopBar, Button } from '../../components';
+import React, { useCallback } from 'react';
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+
+import { TopBar, Button, InfoRow } from '../../components';
+import { InfoIcon } from '../../assets/Icons';
 import Colors from '../../theme/colors';
 import Routes from '../../navigation/routes';
 import { formatExpiryDate } from '../../utils/helpers';
 
 const ProductDetailsScreen = ({ navigation, route }) => {
   const productData = route?.params?.productData;
+
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('dark-content');
+      StatusBar.setBackgroundColor(Colors.white);
+    }, []),
+  );
 
   if (!productData) {
     return (
@@ -34,10 +44,10 @@ const ProductDetailsScreen = ({ navigation, route }) => {
     assigned_picker_putter,
   } = productData;
 
-  const available_qty = inventory?.inventory_count ?? quantity ?? '-';
-  const display_batch = inventory?.batch_no ?? batch_number ?? '-';
+  const available_qty = inventory?.inventory_count ?? quantity ?? null;
+  const display_batch = inventory?.batch_no ?? batch_number ?? null;
   const display_expiry = formatExpiryDate(inventory?.exp_date ?? expiry_date);
-  const display_mrp = inventory?.mrp ?? mrp ?? '-';
+  const display_mrp = inventory?.mrp ?? mrp ?? null;
   const display_location = inventory?.locn ?? location ?? null;
   const is_putaway_completed = putaway_status === 'COMPLETED';
 
@@ -51,45 +61,46 @@ const ProductDetailsScreen = ({ navigation, route }) => {
         {/* Product Details */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Product Details</Text>
-          <DetailRow label="Product Name" value={product?.name} />
-          <DetailRow label="DPID" value={product?.dp_id} />
-          <DetailRow label="Pack Size" value={product?.pack_size} />
-          <DetailRow label="Manufacturer" value={product?.manufacturer} />
-          <DetailRow
+          <InfoRow label="Product Name" value={product?.name} />
+          <InfoRow label="DPID" value={product?.dp_id} />
+          <InfoRow label="Pack Size" value={product?.pack_size} />
+          <InfoRow label="Manufacturer" value={product?.manufacturer} />
+          <InfoRow
             label="MRP"
-            value={display_mrp !== '-' ? `₹${display_mrp}` : '-'}
+            value={display_mrp ? `₹${display_mrp}` : null}
+            last
           />
         </View>
 
         {/* Batch Details */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Batch Details</Text>
-          <DetailRow label="Batch Number" value={display_batch} />
-          <DetailRow label="Available QTY" value={available_qty} />
-          <DetailRow label="Expiry Date" value={display_expiry} />
+          <InfoRow label="Batch Number" value={display_batch} />
+          <InfoRow label="Available QTY" value={available_qty} />
+          <InfoRow label="Expiry Date" value={display_expiry} last />
         </View>
 
         {/* Partner Details */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Partner Details</Text>
-          <DetailRow label="Partner Name" value={partner?.name} />
-          <DetailRow label="Partner SKU ID" value={partner_sku_id} />
-          <DetailRow label="Invoice Number" value={invoice_number} />
+          <InfoRow label="Partner Name" value={partner?.name} />
+          <InfoRow label="Partner SKU ID" value={partner_sku_id} />
+          <InfoRow label="Invoice Number" value={invoice_number} last />
         </View>
 
         {/* Warehouse Information */}
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Warehouse Details</Text>
-          <DetailRow
+          <InfoRow
             label="Location (Bin)"
             value={display_location}
-            highlight
+            valueStyle={styles.locationValue}
           />
-          <DetailRow
+          <InfoRow
             label="Assigned Picker Name"
             value={assigned_picker_putter}
           />
-          <DetailRow label="Putaway Status" value={putaway_status} />
+          <InfoRow label="Putaway Status" value={putaway_status} last />
         </View>
 
         {/* Verify Putaway */}
@@ -108,8 +119,7 @@ const ProductDetailsScreen = ({ navigation, route }) => {
               }
             />
             <View style={styles.verifyInfo}>
-              {/* Info icon */}
-              <Text style={styles.infoIcon}>ⓘ</Text>
+              <InfoIcon width={14} height={14} color={Colors.blue} />
               <Text style={styles.verifyHint}>
                 Scan Location QR to Verify Putaway
               </Text>
@@ -123,27 +133,6 @@ const ProductDetailsScreen = ({ navigation, route }) => {
   );
 };
 
-const DetailRow = ({ label, value, highlight }) => (
-  <View style={styles.row}>
-    <Text style={styles.label}>{label}</Text>
-    {highlight ? (
-      <View style={styles.locationHighlight}>
-        <Text style={styles.locationHighlightText}>
-          {value !== null && value !== undefined && value !== ''
-            ? String(value)
-            : '-'}
-        </Text>
-      </View>
-    ) : (
-      <Text style={styles.value}>
-        {value !== null && value !== undefined && value !== ''
-          ? String(value)
-          : '-'}
-      </Text>
-    )}
-  </View>
-);
-
 export default ProductDetailsScreen;
 
 const styles = StyleSheet.create({
@@ -152,7 +141,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.g50,
   },
   container: {
-    padding: 16,
+    paddingBottom: 30,
   },
   center: {
     flex: 1,
@@ -163,78 +152,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.navy,
   },
-  locationCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.blue,
-  },
-  locationLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: Colors.blue,
-    marginBottom: 8,
-  },
-  locationValue: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.navy,
-  },
-  locationMessage: {
-    marginTop: 8,
-    fontSize: 13,
-    color: Colors.navy,
-  },
   card: {
+    marginHorizontal: 16,
+    marginTop: 12,
     backgroundColor: Colors.white,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.g100,
+    paddingHorizontal: 16,
+    overflow: 'hidden',
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 11,
     fontWeight: '700',
-    color: Colors.blue,
-    marginBottom: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 7,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g100,
-  },
-  label: {
-    flex: 0.8,
-    fontSize: 12,
     color: Colors.g500,
+    textTransform: 'uppercase',
+    letterSpacing: 0.7,
+    paddingTop: 14,
+    paddingBottom: 6,
   },
-  value: {
-    flex: 1.2,
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.g900,
-    fontFamily: 'monospace',
-    textAlign: 'right',
+  locationValue: {
+    color: Colors.blue,
   },
   verifySection: {
-    marginTop: 4,
+    marginHorizontal: 16,
+    marginTop: 16,
     alignItems: 'center',
   },
   verifyInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 5,
     marginTop: 8,
-  },
-  infoIcon: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.blue,
-    marginRight: 5,
   },
   verifyHint: {
     fontSize: 12,
@@ -243,15 +193,5 @@ const styles = StyleSheet.create({
   },
   bottomSpace: {
     height: 30,
-  },
-  locationHighlight: {
-    maxWidth: '60%',
-  },
-  locationHighlightText: {
-    fontSize: 13,
-    fontWeight: '700',
-    fontFamily: 'monospace',
-    color: Colors.blue,
-    textAlign: 'right',
   },
 });

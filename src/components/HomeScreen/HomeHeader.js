@@ -1,10 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Line, Rect } from 'react-native-svg';
-import { StoreIcon, HandWaveIcon } from '../../assets/Icons';
+import Svg, { Line } from 'react-native-svg';
+import { StoreIcon, HandWaveIcon, ScanIcon } from '../../assets/Icons';
 import Colors from '../../theme/colors';
 import { useUser } from '../../context/UserContext';
+import { HomeHeaderLayout } from '../../constants/layout';
+
+const { STATUS_BADGE_TOP, SCAN_BUTTON_TOP, HEADER_ACTION_INSET } =
+  HomeHeaderLayout;
 
 const HamburgerIcon = () => (
   <Svg width={18} height={14} viewBox="0 0 18 14" fill="none">
@@ -38,29 +42,6 @@ const HamburgerIcon = () => (
   </Svg>
 );
 
-// renders the qr code scan icon used in the ui
-const QrScanIcon = () => (
-  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-    {/* Top-left */}
-    <Path d="M3 3H9V9H3V3Z" stroke={Colors.white} strokeWidth="1.8" />
-    <Path d="M5 5H7V7H5V5Z" fill={Colors.white} />
-
-    {/* Top-right */}
-    <Path d="M15 3H21V9H15V3Z" stroke={Colors.white} strokeWidth="1.8" />
-    <Path d="M17 5H19V7H17V5Z" fill={Colors.white} />
-
-    {/* Bottom-left */}
-    <Path d="M3 15H9V21H3V15Z" stroke={Colors.white} strokeWidth="1.8" />
-    <Path d="M5 17H7V19H5V17Z" fill={Colors.white} />
-
-    {/* Bottom-right */}
-    <Rect x="15" y="15" width="3" height="3" fill={Colors.white} />
-    <Rect x="19" y="15" width="2" height="2" fill={Colors.white} />
-    <Rect x="15" y="19" width="2" height="2" fill={Colors.white} />
-    <Rect x="19" y="19" width="3" height="2" fill={Colors.white} />
-  </Svg>
-);
-
 const HomeHeader = ({ onMenuPress, onScanQRPress }) => {
   const insets = useSafeAreaInsets();
   const { user } = useUser();
@@ -75,7 +56,9 @@ const HomeHeader = ({ onMenuPress, onScanQRPress }) => {
       <View style={styles.blobBottomLeft} />
 
       {/* Status badge — top right */}
-      <View style={[styles.statusBadge, { top: insets.top + 12 }]}>
+      <View
+        style={[styles.statusBadge, { top: insets.top + STATUS_BADGE_TOP }]}
+      >
         <View
           style={[
             styles.statusDot,
@@ -89,12 +72,12 @@ const HomeHeader = ({ onMenuPress, onScanQRPress }) => {
 
       {/* Scan qr  below Active Status */}
       <TouchableOpacity
-        style={[styles.scanQrButton, { top: insets.top + 64 }]}
+        style={[styles.scanQrButton, { top: insets.top + SCAN_BUTTON_TOP }]}
         onPress={onScanQRPress}
         activeOpacity={0.8}
       >
         <View style={styles.scanQrContainer}>
-          <QrScanIcon />
+          <ScanIcon size={24} color={Colors.white} />
         </View>
         <Text style={styles.scanQrText}>Scan QR</Text>
       </TouchableOpacity>
@@ -181,7 +164,7 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 8,
   },
-  textCol: { flex: 1, paddingRight: 90 },
+  textCol: { flex: 1, paddingRight: HEADER_ACTION_INSET },
   greetRow: {
     flexDirection: 'row',
     alignItems: 'center',

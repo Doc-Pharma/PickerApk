@@ -14,35 +14,7 @@ import {
 import Colors from '../../theme/colors';
 import Routes from '../../navigation/routes';
 import * as pickingApi from '../../api/picking';
-
-const formatExpiry = raw => {
-  if (!raw) return '';
-  const s = raw.trim();
-  if (/^\d{1,2}\/\d{2}$/.test(s)) return s;
-  const ddmmyyyy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (ddmmyyyy)
-    return `${ddmmyyyy[2].padStart(2, '0')}/${ddmmyyyy[3].slice(-2)}`;
-  try {
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
-      return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(
-        d.getFullYear(),
-      ).slice(-2)}`;
-    }
-  } catch {}
-  return s;
-};
-
-const parseChips = loc => {
-  const parts = (loc || '').split('-');
-  if (parts.length < 4) return [loc].filter(Boolean);
-  return [
-    `Aisle ${parts[0]}`,
-    `Rack ${parts[1].replace('R', '')}`,
-    `Shelf ${parts[2].replace('S', '')}`,
-    `Bin ${parts[3].replace('B', '')}`,
-  ];
-};
+import { formatExpiryDate, parseChips } from '../../utils/helpers';
 
 const PickingScanProductScreen = ({ navigation, route }) => {
   const { orderId, item, allItems, partnerId } = route?.params || {};
@@ -79,7 +51,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
             ...b,
             id: b.batch_no,
             label: b.batch_no,
-            expiry: formatExpiry(b.exp_date),
+            expiry: formatExpiryDate(b.exp_date),
           })),
         );
       })
@@ -111,7 +83,7 @@ const PickingScanProductScreen = ({ navigation, route }) => {
       exp_date: expRaw,
       id: batchNo,
       label: batchNo,
-      expiry: formatExpiry(expRaw),
+      expiry: formatExpiryDate(expRaw),
       partner_id: scannedPartnerId,
       unique_id: uniqueId,
     };
