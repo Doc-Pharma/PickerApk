@@ -27,6 +27,11 @@ const Colors = {
   g50: '#F9FAFB',
 
   white: '#FFFFFF',
+
+  // Invoice QR — pure black on pure white so hardware scanners
+  // (e.g. DC5132) can decode it. Do not tint or invert these.
+  qrFg: '#000000',
+  qrBg: '#FFFFFF',
 };
 
 export default Colors;
