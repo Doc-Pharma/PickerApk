@@ -102,8 +102,9 @@ const PickingCompleteScreen = ({ navigation, route }) => {
           <QRCode
             value={qrValue}
             size={150}
-            color={Colors.white}
-            backgroundColor="transparent"
+            color={Colors.qrFg}
+            backgroundColor={Colors.qrBg}
+            quietZone={20}
           />
         </View>
         <Text style={s.qrId}>Order #{fhOrderId}</Text>
@@ -196,8 +197,8 @@ const s = StyleSheet.create({
   },
   qrSub: { fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 18 },
   qrBox: {
-    padding: 14,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    padding: 6,
+    backgroundColor: Colors.qrBg,
     borderRadius: 12,
     marginBottom: 12,
   },

@@ -12,7 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import { CheckIcon, ChevronRightIcon } from '../../assets/Icons';
-import { TopBar, Badge } from '../../components';
+import { TopBar, Badge, InfoRow } from '../../components';
 import Colors from '../../theme/colors';
 import Toast from '../../utils/toast';
 import { getOrderDetail } from '../../api/orders';
@@ -101,15 +101,6 @@ const formatDate = iso => {
     d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
   );
 };
-
-const InfoRow = ({ label, value, last = false }) => (
-  <View style={[s.infoRow, last && { borderBottomWidth: 0 }]}>
-    <Text style={s.infoLabel}>{label}</Text>
-    <Text style={s.infoValue} numberOfLines={1}>
-      {value || '---'}
-    </Text>
-  </View>
-);
 
 const PastOrderDetailScreen = ({ navigation, route }) => {
   const { order: summaryOrder } = route?.params || {};
@@ -210,8 +201,9 @@ const PastOrderDetailScreen = ({ navigation, route }) => {
               <QRCode
                 value={`${ENV.ONE_APP_URL}/home?fh_order_id=${order?.invoice_id}`}
                 size={190}
-                color={Colors.g900}
-                backgroundColor="transparent"
+                color={Colors.qrFg}
+                backgroundColor={Colors.qrBg}
+                quietZone={24}
               />
             </View>
           </View>
@@ -326,14 +318,6 @@ const s = StyleSheet.create({
     paddingHorizontal: 16,
     overflow: 'hidden',
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 13,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g50,
-  },
   infoLabel: { fontSize: 13, color: Colors.g500, fontWeight: '500' },
   infoValue: {
     fontSize: 13,
@@ -412,8 +396,8 @@ const s = StyleSheet.create({
     borderBottomColor: Colors.g50,
   },
   qrBox: {
-    padding: 14,
-    backgroundColor: Colors.g50,
+    padding: 6,
+    backgroundColor: Colors.qrBg,
     borderRadius: 12,
     marginTop: 14,
   },

@@ -1,10 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path, Line } from 'react-native-svg';
-import { StoreIcon, HandWaveIcon } from '../../assets/Icons';
+import Svg, { Line } from 'react-native-svg';
+import { StoreIcon, HandWaveIcon, ScanIcon } from '../../assets/Icons';
 import Colors from '../../theme/colors';
 import { useUser } from '../../context/UserContext';
+import { HomeHeaderLayout } from '../../constants/layout';
+
+const { STATUS_BADGE_TOP, SCAN_BUTTON_TOP, HEADER_ACTION_INSET } =
+  HomeHeaderLayout;
 
 const HamburgerIcon = () => (
   <Svg width={18} height={14} viewBox="0 0 18 14" fill="none">
@@ -38,7 +42,7 @@ const HamburgerIcon = () => (
   </Svg>
 );
 
-const HomeHeader = ({ onMenuPress }) => {
+const HomeHeader = ({ onMenuPress, onScanQRPress }) => {
   const insets = useSafeAreaInsets();
   const { user } = useUser();
   const statusStr = String(user?.status ?? '').toLowerCase();
@@ -52,7 +56,9 @@ const HomeHeader = ({ onMenuPress }) => {
       <View style={styles.blobBottomLeft} />
 
       {/* Status badge — top right */}
-      <View style={[styles.statusBadge, { top: insets.top + 12 }]}>
+      <View
+        style={[styles.statusBadge, { top: insets.top + STATUS_BADGE_TOP }]}
+      >
         <View
           style={[
             styles.statusDot,
@@ -63,6 +69,18 @@ const HomeHeader = ({ onMenuPress }) => {
           {isActive ? 'Active' : 'Inactive'}
         </Text>
       </View>
+
+      {/* Scan qr  below Active Status */}
+      <TouchableOpacity
+        style={[styles.scanQrButton, { top: insets.top + SCAN_BUTTON_TOP }]}
+        onPress={onScanQRPress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.scanQrContainer}>
+          <ScanIcon size={24} color={Colors.white} />
+        </View>
+        <Text style={styles.scanQrText}>Scan QR</Text>
+      </TouchableOpacity>
 
       <View style={styles.contentRow}>
         {/* Hamburger button */}
@@ -146,7 +164,7 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 8,
   },
-  textCol: { flex: 1 },
+  textCol: { flex: 1, paddingRight: HEADER_ACTION_INSET },
   greetRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,5 +217,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255,255,255,0.85)',
     fontWeight: '600',
+  },
+
+  scanQrButton: {
+    position: 'absolute',
+    right: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
+
+  scanQrText: {
+    marginTop: 3,
+    fontSize: 11,
+    color: Colors.white,
+    fontWeight: '600',
+  },
+
+  scanQrContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
 });

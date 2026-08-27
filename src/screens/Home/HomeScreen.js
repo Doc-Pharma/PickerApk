@@ -185,6 +185,10 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const handleScanQR = () => {
+    navigation.navigate(Routes.PRODUCT_QR_SCAN);
+  };
+
   //  Render ─────────────────────────────────────────────────────────────────
   return (
     <View style={s.root}>
@@ -203,7 +207,10 @@ const HomeScreen = ({ navigation }) => {
         renderItem={renderItem}
         keyExtractor={(item, i) => item._type + (item.id || '') + i}
         ListHeaderComponent={
-          <HomeHeader onMenuPress={() => setSidebarOpen(true)} />
+          <HomeHeader
+            onMenuPress={() => setSidebarOpen(true)}
+            onScanQRPress={handleScanQR}
+          />
         }
         refreshControl={
           <RefreshControl

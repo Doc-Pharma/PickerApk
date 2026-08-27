@@ -3,6 +3,7 @@ export { default as TopBar } from './common/TopBar';
 export { default as Button } from './common/Button';
 export { default as Badge } from './common/Badge';
 export { default as InfoStrip } from './common/InfoStrip';
+export { default as InfoRow } from './common/InfoRow';
 export { default as ProductDetailCard } from './common/ProductDetailCard';
 
 //  HomeScreen components

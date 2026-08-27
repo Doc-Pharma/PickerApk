@@ -457,3 +457,33 @@ export const ScanIcon = ({
     />
   </Svg>
 );
+
+//  Info — circled "i", used for inline hints
+export const InfoIcon = ({
+  width = 14,
+  height = 14,
+  color = '#1B5FA8',
+  strokeWidth = 2,
+  size,
+}) => (
+  <Svg
+    width={size || width}
+    height={size || height}
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth={strokeWidth} />
+    <Path
+      d="M12 11v5"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+    />
+    <Path
+      d="M12 8h.01"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+    />
+  </Svg>
+);

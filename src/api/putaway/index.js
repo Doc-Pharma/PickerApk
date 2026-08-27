@@ -53,3 +53,26 @@ export const scanPutAwayLocation = (itemId, scannedLocationId) =>
 
 export const markTaskComplete = itemId =>
   request('POST', `/putaway/${itemId}/mark-complete`, {});
+
+export const scanProductQR = qrData =>
+  request('POST', '/picker-putter-order/product/scan-qr', {
+    qr_code_data: {
+      product_id: qrData.productId,
+      batch: qrData.batchNumber,
+      partner_id: qrData.partnerId,
+      dp_id: qrData.dpId,
+    },
+  });
+
+export const verifyProductPutaway = (
+  productId,
+  partnerId,
+  batchNumber,
+  scannedLocation,
+) =>
+  request('POST', '/picker-putter-order/product/verify-putaway', {
+    product_id: productId,
+    partner_id: partnerId,
+    batch_number: batchNumber,
+    scanned_location: scannedLocation,
+  });

@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import DeviceInfo from 'react-native-device-info';
 import { BackIcon } from '../../assets/Icons';
+import { InfoRow as SharedInfoRow } from '../../components';
 import Colors from '../../theme/colors';
 import Toast from '../../utils/toast';
 import { useUser } from '../../context/UserContext';
@@ -148,15 +149,8 @@ const Avatar = ({ name }) => {
   );
 };
 
-//  Info row
-const InfoRow = ({ label, value, valueStyle, last = false }) => (
-  <View style={[s.infoRow, last && { borderBottomWidth: 0 }]}>
-    <Text style={s.infoLabel}>{label}</Text>
-    <Text style={[s.infoValue, valueStyle]} numberOfLines={1}>
-      {value || '---'}
-    </Text>
-  </View>
-);
+//  Info row — the shared row at the Profile page's 14px, non-monospace spec
+const InfoRow = props => <SharedInfoRow size={14} mono={false} {...props} />;
 
 //  Screen
 const ProfileScreen = ({ navigation, route }) => {
@@ -439,24 +433,6 @@ const s = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 4,
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.g50,
-  },
-  infoLabel: { fontSize: 14, color: Colors.g500, fontWeight: '500' },
-  infoValue: {
-    fontSize: 14,
-    color: Colors.g900,
-    fontWeight: '700',
-    textAlign: 'right',
-    flex: 1,
-    marginLeft: 16,
-  },
-
   // Update row
   updateRow: {
     marginHorizontal: 16,

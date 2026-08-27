@@ -15,6 +15,7 @@ import Routes from '../../navigation/routes';
 import * as paApi from '../../api/putaway';
 import useApi from '../../hooks/useApi';
 import Toast from '../../utils/toast';
+import { parseChips } from '../../utils/helpers';
 
 const scanMsg = (err, expectedLocation) => {
   const raw = (err?.message || '').toLowerCase();
@@ -29,17 +30,6 @@ const scanMsg = (err, expectedLocation) => {
   if (raw && !raw.includes('request failed') && !raw.includes('network'))
     return err.message;
   return `Scan failed. Try again.`;
-};
-
-const parseChips = loc => {
-  const p = (loc || '').split('-');
-  if (p.length < 4) return [loc];
-  return [
-    `Aisle ${p[0]}`,
-    `Rack ${p[1].replace('R', '')}`,
-    `Shelf ${p[2].replace('S', '')}`,
-    `Bin ${p[3].replace('B', '')}`,
-  ];
 };
 
 const PutAwayScanLocationScreen = ({ navigation, route }) => {
